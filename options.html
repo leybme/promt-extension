@@ -298,6 +298,292 @@
                 width: 100%;
             }
         }
+
+        /* Placeholder Management Styles */
+        .placeholder-section {
+            margin-top: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .placeholder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .manage-placeholders-btn {
+            padding: 6px 12px !important;
+            font-size: 12px !important;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .manage-placeholders-btn:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            transform: translateY(-1px);
+        }
+
+        .placeholder-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .placeholder-tag {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #3730a3;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #c7d2fe;
+            user-select: none;
+        }
+
+        .placeholder-tag:hover {
+            background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .placeholder-tag.empty-state {
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: default;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .placeholder-tag.empty-state:hover {
+            transform: none;
+            box-shadow: none;
+            background: #f1f5f9;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .close-modal:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .placeholder-list {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .placeholder-list h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #374151;
+        }
+
+        .existing-placeholder {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .existing-placeholder-info {
+            flex: 1;
+        }
+
+        .existing-placeholder-name {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .existing-placeholder-desc {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .delete-placeholder {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+
+        .delete-placeholder:hover {
+            background: #dc2626;
+        }
+
+        /* Default Values Styles */
+        .default-values-section {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border: 1px solid #bae6fd;
+        }
+
+        .default-values-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .default-value-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0f2fe;
+        }
+
+        .default-value-placeholder {
+            font-weight: 600;
+            color: #0369a1;
+            font-size: 13px;
+        }
+
+        .default-value-text {
+            color: #374151;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .default-value-empty {
+            color: #9ca3af;
+            font-size: 12px;
+            text-align: center;
+            padding: 16px;
+            font-style: italic;
+        }
+
+        .default-value-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .default-value-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        .default-value-field {
+            margin-bottom: 16px;
+        }
+
+        .default-value-field label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .placeholder-badge {
+            background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+            color: #5b21b6;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
     </style>
 </head>
 
@@ -317,6 +603,20 @@
             <div class="form-group">
                 <label for="prompt">Prompt Text</label>
                 <textarea id="prompt" placeholder="Enter your prompt text here..."></textarea>
+                <div class="placeholder-section">
+                    <div class="placeholder-header">
+                        <span>Available Placeholders:</span>
+                        <button type="button" id="managePlaceholders" class="manage-placeholders-btn">Manage Placeholders</button>
+                    </div>
+                    <div id="placeholderTags" class="placeholder-tags"></div>
+                </div>
+                <div class="default-values-section">
+                    <div class="placeholder-header">
+                        <span>Default Values:</span>
+                        <button type="button" id="editDefaultValues" class="manage-placeholders-btn">Edit Default Values</button>
+                    </div>
+                    <div id="defaultValuesList" class="default-values-list"></div>
+                </div>
             </div>
 
             <div class="button-group">
@@ -335,6 +635,61 @@
             <p>Right-click on any webpage to access your prompts via the context menu</p>
             <p>Developed by leybme</p>
             <p>Version 1.0.0</p>
+        </div>
+    </div>
+
+    <!-- Placeholder Management Modal -->
+    <div id="placeholderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Placeholders</h2>
+                <button class="close-modal" id="closePlaceholderModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="placeholderName">Placeholder Name</label>
+                    <input type="text" id="placeholderName" placeholder="e.g., TARGET_LANGUAGE, FULL_NAME">
+                </div>
+                <div class="form-group">
+                    <label for="placeholderDescription">Description (Optional)</label>
+                    <input type="text" id="placeholderDescription" placeholder="e.g., Programming language to convert to">
+                </div>
+                <div class="form-group">
+                    <label for="placeholderDefaultValue">Default Value (Optional)</label>
+                    <input type="text" id="placeholderDefaultValue" placeholder="e.g., JavaScript, John Smith">
+                    <small style="color: #6b7280; font-size: 12px; margin-top: 4px; display: block;">
+                        If set, this value will be used automatically when inserting prompts
+                    </small>
+                </div>
+                <div class="button-group">
+                    <button id="addPlaceholder">Add Placeholder</button>
+                    <button id="cancelPlaceholder">Cancel</button>
+                </div>
+                <div class="placeholder-list">
+                    <h3>Existing Placeholders</h3>
+                    <div id="existingPlaceholders"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Default Values Management Modal -->
+    <div id="defaultValuesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Default Values</h2>
+                <button class="close-modal" id="closeDefaultValuesModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #6b7280; margin-bottom: 20px; line-height: 1.5;">
+                    Set default values for your placeholders. When a prompt contains these placeholders, the default values will be used automatically without asking.
+                </p>
+                <div id="defaultValuesForm"></div>
+                <div class="button-group" style="margin-top: 24px;">
+                    <button id="saveDefaultValues">Save Default Values</button>
+                    <button id="cancelDefaultValues">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 

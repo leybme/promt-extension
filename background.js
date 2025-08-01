@@ -1,13 +1,18 @@
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension installed/reloaded');
   
-  // First create default prompts if they don't exist, then update menu
-  chrome.storage.local.get(["prompts"], (result) => {
+  // First create default prompts and placeholders if they don't exist, then update menu
+  chrome.storage.local.get(["prompts", "placeholders"], (result) => {
     const prompts = result.prompts || [];
+    const placeholders = result.placeholders || [];
     console.log('Current prompts:', prompts.length);
+    console.log('Current placeholders:', placeholders.length);
+    
+    let shouldUpdateMenu = false;
     
     if (prompts.length === 0) {
       console.log('Creating default prompts...');
+      shouldUpdateMenu = true;
       // Create default prompts first
       const defaultPrompts = [
         {
@@ -56,6 +61,26 @@ chrome.runtime.onInstalled.addListener(() => {
         updatePromptsMenu();
       });
     } else {
+      shouldUpdateMenu = true;
+    }
+    
+    if (placeholders.length === 0) {
+      console.log('Creating default placeholders...');
+      const defaultPlaceholders = [
+        { name: 'TARGET_LANGUAGE', description: 'Programming language to convert to', defaultValue: '' },
+        { name: 'FULL_NAME', description: 'Your full name', defaultValue: '' },
+        { name: 'POSITION', description: 'Your job title or position', defaultValue: '' },
+        { name: 'COMPANY', description: 'Your company name', defaultValue: '' },
+        { name: 'PROJECT_NAME', description: 'Name of the current project', defaultValue: '' },
+        { name: 'FRAMEWORK', description: 'Framework or library being used', defaultValue: '' },
+        { name: 'DATABASE', description: 'Database system being used', defaultValue: '' },
+        { name: 'API_NAME', description: 'Name of the API or service', defaultValue: '' }
+      ];
+      
+      chrome.storage.local.set({ placeholders: defaultPlaceholders });
+    }
+    
+    if (shouldUpdateMenu) {
       updatePromptsMenu();
     }
   });
@@ -68,49 +93,284 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     const promptId = info.menuItemId.replace("prompt_", "");
     console.log('Prompt ID:', promptId);
     
-    chrome.storage.local.get(["prompts"], (result) => {
+    chrome.storage.local.get(["prompts", "placeholders"], (result) => {
       const prompts = result.prompts || [];
+      const placeholders = result.placeholders || [];
       const prompt = prompts.find(p => p.id === promptId);
       console.log('Found prompt:', prompt);
       
       if (prompt) {
-        // First try a simple test injection
-        chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          function: () => {
-            console.log('Script injection successful!');
-            return true;
+        let promptText = prompt.text;
+        
+        // Check if the prompt contains placeholders
+        const placeholderPattern = /\[([A-Z_]+)\]/g;
+        const foundPlaceholders = [...promptText.matchAll(placeholderPattern)];
+        
+        if (foundPlaceholders.length > 0) {
+          // Show placeholder replacement dialog
+          const uniquePlaceholders = [...new Set(foundPlaceholders.map(match => match[1]))];
+          
+          // Check which placeholders have default values
+          let finalText = promptText;
+          const placeholdersNeedingInput = [];
+          
+          uniquePlaceholders.forEach(placeholderName => {
+            const placeholderInfo = placeholders.find(p => p.name === placeholderName);
+            if (placeholderInfo && placeholderInfo.defaultValue && placeholderInfo.defaultValue.trim()) {
+              // Replace with default value using simple string replacement
+              const placeholder = `[${placeholderName}]`;
+              finalText = finalText.split(placeholder).join(placeholderInfo.defaultValue);
+            } else {
+              // Needs user input
+              placeholdersNeedingInput.push(placeholderName);
+            }
+          });
+          
+          if (placeholdersNeedingInput.length > 0) {
+            // Show dialog only for placeholders without default values
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              function: showPlaceholderDialog,
+              args: [finalText, placeholdersNeedingInput, placeholders]
+            });
+          } else {
+            // All placeholders have default values, insert directly
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              function: insertPromptSimple,
+              args: [finalText]
+            });
           }
-        }).then((results) => {
-          console.log('Test injection results:', results);
-          
-          // If test works, try the actual insertion
+        } else {
+          // No placeholders, proceed with original insertion logic
+          // First try a simple test injection
           chrome.scripting.executeScript({
             target: { tabId: tab.id },
-            function: insertPromptSimple,
-            args: [prompt.text]
+            function: () => {
+              console.log('Script injection successful!');
+              return true;
+            }
+          }).then((results) => {
+            console.log('Test injection results:', results);
+            
+            // If test works, try the actual insertion
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              function: insertPromptSimple,
+              args: [promptText]
+            });
+            
+          }).catch(error => {
+            console.error('Script injection failed:', error);
+            
+            // Try copying to clipboard as fallback
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              function: (text) => {
+                navigator.clipboard.writeText(text).then(() => {
+                  alert('Prompt copied to clipboard: ' + text.substring(0, 50) + '...');
+                });
+              },
+              args: [promptText]
+            }).catch(clipboardError => {
+              console.error('Clipboard fallback also failed:', clipboardError);
+            });
           });
-          
-        }).catch(error => {
-          console.error('Script injection failed:', error);
-          
-          // Try copying to clipboard as fallback
-          chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: (text) => {
-              navigator.clipboard.writeText(text).then(() => {
-                alert('Prompt copied to clipboard: ' + text.substring(0, 50) + '...');
-              });
-            },
-            args: [prompt.text]
-          }).catch(clipboardError => {
-            console.error('Clipboard fallback also failed:', clipboardError);
-          });
-        });
+        }
       }
     });
   }
 });
+
+function showPlaceholderDialog(promptText, foundPlaceholders, availablePlaceholders) {
+  console.log('Showing placeholder dialog for:', foundPlaceholders);
+  
+  // Create modal dialog
+  const modal = document.createElement('div');
+  modal.id = 'placeholderReplacementModal';
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  `;
+  
+  const modalContent = document.createElement('div');
+  modalContent.style.cssText = `
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  `;
+  
+  const title = document.createElement('h2');
+  title.textContent = 'Replace Placeholders';
+  title.style.cssText = `
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 24px;
+    font-weight: 600;
+  `;
+  
+  const description = document.createElement('p');
+  description.textContent = 'Please provide values for the following placeholders:';
+  description.style.cssText = `
+    margin: 0 0 20px 0;
+    color: #666;
+    line-height: 1.5;
+  `;
+  
+  const form = document.createElement('form');
+  const inputs = {};
+  
+  foundPlaceholders.forEach(placeholderName => {
+    const fieldGroup = document.createElement('div');
+    fieldGroup.style.cssText = 'margin-bottom: 16px;';
+    
+    const label = document.createElement('label');
+    label.textContent = `[${placeholderName}]`;
+    label.style.cssText = `
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #374151;
+    `;
+    
+    // Find description from available placeholders
+    const placeholderInfo = availablePlaceholders.find(p => p.name === placeholderName);
+    if (placeholderInfo && placeholderInfo.description) {
+      const desc = document.createElement('small');
+      desc.textContent = placeholderInfo.description;
+      desc.style.cssText = `
+        display: block;
+        color: #6b7280;
+        margin-bottom: 6px;
+        font-size: 12px;
+      `;
+      label.appendChild(desc);
+    }
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = `Enter value for ${placeholderName}`;
+    input.style.cssText = `
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    `;
+    
+    input.addEventListener('focus', () => {
+      input.style.borderColor = '#4f46e5';
+    });
+    
+    input.addEventListener('blur', () => {
+      input.style.borderColor = '#d1d5db';
+    });
+    
+    inputs[placeholderName] = input;
+    
+    fieldGroup.appendChild(label);
+    fieldGroup.appendChild(input);
+    form.appendChild(fieldGroup);
+  });
+  
+  const buttonGroup = document.createElement('div');
+  buttonGroup.style.cssText = `
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    justify-content: flex-end;
+  `;
+  
+  const cancelButton = document.createElement('button');
+  cancelButton.type = 'button';
+  cancelButton.textContent = 'Cancel';
+  cancelButton.style.cssText = `
+    padding: 10px 20px;
+    border: 2px solid #d1d5db;
+    background: white;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  `;
+  
+  const insertButton = document.createElement('button');
+  insertButton.type = 'submit';
+  insertButton.textContent = 'Insert Prompt';
+  insertButton.style.cssText = `
+    padding: 10px 20px;
+    border: none;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  `;
+  
+  cancelButton.addEventListener('click', () => {
+    document.body.removeChild(modal);
+  });
+  
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    let finalText = promptText;
+    
+    // Replace all placeholders with user input
+    foundPlaceholders.forEach(placeholderName => {
+      const value = inputs[placeholderName].value.trim();
+      const placeholder = `[${placeholderName}]`;
+      finalText = finalText.split(placeholder).join(value);
+    });
+    
+    // Remove the modal
+    document.body.removeChild(modal);
+    
+    // Insert the final text
+    insertPromptSimple(finalText);
+  });
+  
+  buttonGroup.appendChild(cancelButton);
+  buttonGroup.appendChild(insertButton);
+  
+  modalContent.appendChild(title);
+  modalContent.appendChild(description);
+  modalContent.appendChild(form);
+  modalContent.appendChild(buttonGroup);
+  modal.appendChild(modalContent);
+  
+  document.body.appendChild(modal);
+  
+  // Focus on first input
+  if (foundPlaceholders.length > 0) {
+    inputs[foundPlaceholders[0]].focus();
+  }
+  
+  // Close on outside click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+    }
+  });
+}
 
 function insertPromptSimple(text) {
   console.log('insertPromptSimple called with:', text);

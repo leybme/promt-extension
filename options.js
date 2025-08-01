@@ -91,6 +91,24 @@ function createDefaultPrompts() {
   });
 }
 
+function createDefaultPlaceholders() {
+  const defaultPlaceholders = [
+    { name: 'TARGET_LANGUAGE', description: 'Programming language to convert to', defaultValue: '' },
+    { name: 'FULL_NAME', description: 'Your full name', defaultValue: '' },
+    { name: 'POSITION', description: 'Your job title or position', defaultValue: '' },
+    { name: 'COMPANY', description: 'Your company name', defaultValue: '' },
+    { name: 'PROJECT_NAME', description: 'Name of the current project', defaultValue: '' },
+    { name: 'FRAMEWORK', description: 'Framework or library being used', defaultValue: '' },
+    { name: 'DATABASE', description: 'Database system being used', defaultValue: '' },
+    { name: 'API_NAME', description: 'Name of the API or service', defaultValue: '' }
+  ];
+  
+  chrome.storage.local.set({ placeholders: defaultPlaceholders }, () => {
+    console.log('Default placeholders created');
+    loadPlaceholders();
+  });
+}
+
 function loadPrompts() {
   chrome.storage.local.get(["prompts"], (result) => {
     const prompts = result.prompts || [];
@@ -134,6 +152,113 @@ function loadPrompts() {
       `;
       list.appendChild(div);
     });
+  });
+}
+
+function loadPlaceholders() {
+  chrome.storage.local.get(["placeholders"], (result) => {
+    const placeholders = result.placeholders || [];
+    
+    // If no placeholders exist, create default ones
+    if (placeholders.length === 0) {
+      createDefaultPlaceholders();
+      return;
+    }
+    
+    const tagsContainer = document.getElementById('placeholderTags');
+    tagsContainer.innerHTML = '';
+    
+    if (placeholders.length === 0) {
+      tagsContainer.innerHTML = '<div class="placeholder-tag empty-state">No placeholders available</div>';
+    } else {
+      placeholders.forEach(placeholder => {
+        const tag = document.createElement('div');
+        tag.className = 'placeholder-tag';
+        tag.textContent = `[${placeholder.name}]`;
+        tag.title = placeholder.description || placeholder.name;
+        tag.addEventListener('click', () => {
+          insertPlaceholder(placeholder.name);
+        });
+        tagsContainer.appendChild(tag);
+      });
+    }
+    
+    // Load default values list
+    loadDefaultValuesList(placeholders);
+    
+    // Also update the modal list if it exists
+    updateModalPlaceholderList(placeholders);
+  });
+}
+
+function loadDefaultValuesList(placeholders) {
+  const defaultValuesList = document.getElementById('defaultValuesList');
+  if (!defaultValuesList) return;
+  
+  defaultValuesList.innerHTML = '';
+  
+  if (placeholders.length === 0) {
+    defaultValuesList.innerHTML = '<div class="default-value-empty">No placeholders available</div>';
+    return;
+  }
+  
+  const hasValues = placeholders.some(p => p.defaultValue && p.defaultValue.trim());
+  
+  if (!hasValues) {
+    defaultValuesList.innerHTML = '<div class="default-value-empty">No default values set. Click "Edit Default Values" to add them.</div>';
+    return;
+  }
+  
+  placeholders.forEach(placeholder => {
+    if (placeholder.defaultValue && placeholder.defaultValue.trim()) {
+      const item = document.createElement('div');
+      item.className = 'default-value-item';
+      item.innerHTML = `
+        <span class="default-value-placeholder">[${placeholder.name}]</span>
+        <span class="default-value-text">${placeholder.defaultValue}</span>
+      `;
+      defaultValuesList.appendChild(item);
+    }
+  });
+}
+
+function insertPlaceholder(placeholderName) {
+  const promptTextarea = document.getElementById('prompt');
+  const cursorPos = promptTextarea.selectionStart;
+  const textBefore = promptTextarea.value.substring(0, cursorPos);
+  const textAfter = promptTextarea.value.substring(promptTextarea.selectionEnd);
+  
+  const placeholderText = `[${placeholderName}]`;
+  promptTextarea.value = textBefore + placeholderText + textAfter;
+  
+  // Set cursor position after the inserted placeholder
+  const newCursorPos = cursorPos + placeholderText.length;
+  promptTextarea.setSelectionRange(newCursorPos, newCursorPos);
+  promptTextarea.focus();
+}
+
+function updateModalPlaceholderList(placeholders) {
+  const container = document.getElementById('existingPlaceholders');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (placeholders.length === 0) {
+    container.innerHTML = '<p style="color: #6b7280; font-style: italic;">No placeholders yet. Add your first placeholder above.</p>';
+    return;
+  }
+  
+  placeholders.forEach((placeholder, index) => {
+    const div = document.createElement('div');
+    div.className = 'existing-placeholder';
+    div.innerHTML = `
+      <div class="existing-placeholder-info">
+        <div class="existing-placeholder-name">[${placeholder.name}]</div>
+        ${placeholder.description ? `<div class="existing-placeholder-desc">${placeholder.description}</div>` : ''}
+      </div>
+      <button class="delete-placeholder" data-index="${index}">Delete</button>
+    `;
+    container.appendChild(div);
   });
 }
 
@@ -271,4 +396,169 @@ document.getElementById('promptList').addEventListener('click', (e) => {
   }
 });
 
-document.addEventListener('DOMContentLoaded', loadPrompts);
+document.addEventListener('DOMContentLoaded', () => {
+  loadPrompts();
+  loadPlaceholders();
+});
+
+// Placeholder Management Event Listeners
+document.getElementById('managePlaceholders').addEventListener('click', () => {
+  document.getElementById('placeholderModal').style.display = 'block';
+  chrome.storage.local.get(["placeholders"], (result) => {
+    const placeholders = result.placeholders || [];
+    updateModalPlaceholderList(placeholders);
+  });
+});
+
+document.getElementById('closePlaceholderModal').addEventListener('click', () => {
+  document.getElementById('placeholderModal').style.display = 'none';
+  document.getElementById('placeholderName').value = '';
+  document.getElementById('placeholderDescription').value = '';
+  document.getElementById('placeholderDefaultValue').value = '';
+});
+
+document.getElementById('addPlaceholder').addEventListener('click', () => {
+  const nameEl = document.getElementById('placeholderName');
+  const descEl = document.getElementById('placeholderDescription');
+  const defaultValueEl = document.getElementById('placeholderDefaultValue');
+  const name = nameEl.value.trim().toUpperCase();
+  const description = descEl.value.trim();
+  const defaultValue = defaultValueEl.value.trim();
+  
+  if (name) {
+    chrome.storage.local.get(["placeholders"], (result) => {
+      let placeholders = result.placeholders || [];
+      
+      // Check if placeholder already exists
+      if (placeholders.some(p => p.name === name)) {
+        alert('A placeholder with this name already exists!');
+        return;
+      }
+      
+      placeholders.push({ name, description, defaultValue });
+      
+      chrome.storage.local.set({ placeholders }, () => {
+        nameEl.value = '';
+        descEl.value = '';
+        defaultValueEl.value = '';
+        loadPlaceholders();
+        updateModalPlaceholderList(placeholders);
+      });
+    });
+  }
+});
+
+document.getElementById('cancelPlaceholder').addEventListener('click', () => {
+  document.getElementById('placeholderName').value = '';
+  document.getElementById('placeholderDescription').value = '';
+  document.getElementById('placeholderDefaultValue').value = '';
+});
+
+// Default Values Management Event Listeners
+document.getElementById('editDefaultValues').addEventListener('click', () => {
+  chrome.storage.local.get(["placeholders"], (result) => {
+    const placeholders = result.placeholders || [];
+    showDefaultValuesModal(placeholders);
+  });
+});
+
+document.getElementById('closeDefaultValuesModal').addEventListener('click', () => {
+  document.getElementById('defaultValuesModal').style.display = 'none';
+});
+
+document.getElementById('cancelDefaultValues').addEventListener('click', () => {
+  document.getElementById('defaultValuesModal').style.display = 'none';
+});
+
+document.getElementById('saveDefaultValues').addEventListener('click', () => {
+  saveDefaultValues();
+});
+
+// Handle clicking outside modal to close it
+document.getElementById('defaultValuesModal').addEventListener('click', (e) => {
+  if (e.target.id === 'defaultValuesModal') {
+    document.getElementById('defaultValuesModal').style.display = 'none';
+  }
+});
+
+function showDefaultValuesModal(placeholders) {
+  const modal = document.getElementById('defaultValuesModal');
+  const form = document.getElementById('defaultValuesForm');
+  
+  form.innerHTML = '';
+  
+  if (placeholders.length === 0) {
+    form.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">No placeholders available. Create some placeholders first.</p>';
+  } else {
+    placeholders.forEach((placeholder, index) => {
+      const fieldDiv = document.createElement('div');
+      fieldDiv.className = 'default-value-field';
+      
+      const label = document.createElement('label');
+      label.innerHTML = `
+        <span class="placeholder-badge">[${placeholder.name}]</span>
+        <span>${placeholder.description || 'No description'}</span>
+      `;
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'default-value-input';
+      input.placeholder = `Enter default value for [${placeholder.name}]`;
+      input.value = placeholder.defaultValue || '';
+      input.dataset.index = index;
+      
+      fieldDiv.appendChild(label);
+      fieldDiv.appendChild(input);
+      form.appendChild(fieldDiv);
+    });
+  }
+  
+  modal.style.display = 'block';
+}
+
+function saveDefaultValues() {
+  chrome.storage.local.get(["placeholders"], (result) => {
+    let placeholders = result.placeholders || [];
+    
+    // Update placeholders with new default values
+    const inputs = document.querySelectorAll('#defaultValuesForm .default-value-input');
+    inputs.forEach(input => {
+      const index = parseInt(input.dataset.index);
+      if (placeholders[index]) {
+        placeholders[index].defaultValue = input.value.trim();
+      }
+    });
+    
+    chrome.storage.local.set({ placeholders }, () => {
+      document.getElementById('defaultValuesModal').style.display = 'none';
+      loadPlaceholders();
+    });
+  });
+}
+
+// Handle clicking outside modal to close it
+document.getElementById('placeholderModal').addEventListener('click', (e) => {
+  if (e.target.id === 'placeholderModal') {
+    document.getElementById('placeholderModal').style.display = 'none';
+    document.getElementById('placeholderName').value = '';
+    document.getElementById('placeholderDescription').value = '';
+    document.getElementById('placeholderDefaultValue').value = '';
+  }
+});
+
+// Handle delete placeholder
+document.getElementById('existingPlaceholders').addEventListener('click', (e) => {
+  if (e.target.classList.contains('delete-placeholder')) {
+    const index = parseInt(e.target.dataset.index);
+    
+    chrome.storage.local.get(["placeholders"], (result) => {
+      let placeholders = result.placeholders || [];
+      placeholders.splice(index, 1);
+      
+      chrome.storage.local.set({ placeholders }, () => {
+        loadPlaceholders();
+        updateModalPlaceholderList(placeholders);
+      });
+    });
+  }
+});
