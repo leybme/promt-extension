@@ -6,7 +6,7 @@ A powerful Chrome extension that helps you save, manage, and quickly access your
 
 - **📝 Save Custom Prompts**: Create and store your own prompt templates
 - **🔄 Quick Access**: Right-click context menu to instantly copy prompts to clipboard
-- **🎯 Pre-built Templates**: Comes with 8 ready-to-use prompt templates for common coding tasks
+- **🎯 Pre-built Templates**: Comes with 10 ready-to-use prompt templates for general-purpose tasks
 - **✏️ Edit & Manage**: Full CRUD operations - create, read, update, and delete prompts
 - **🎨 Beautiful UI**: Modern, responsive interface with gradient design
 - **💾 Local Storage**: All prompts are stored locally in your browser
@@ -59,10 +59,9 @@ A powerful Chrome extension that helps you save, manage, and quickly access your
 ### Using Prompts
 
 #### Via Context Menu
-1. Right-click anywhere on a webpage
-2. Look for "Copy Prompt:" submenu
-3. Click on any prompt title to instantly copy it to your clipboard
-4. Paste the prompt wherever you need it
+1. Right-click on any webpage or editable field
+2. Select **Prompt List** and choose a prompt
+3. The prompt will be directly inserted into the active input or textarea
 
 #### Via Prompt Manager
 1. Open the Prompt Manager
@@ -71,16 +70,18 @@ A powerful Chrome extension that helps you save, manage, and quickly access your
 
 ### Default Prompts
 
-The extension comes with 8 pre-built prompt templates:
+The extension comes with 10 pre-built prompt templates:
 
-1. **Code Review** - For reviewing code quality, best practices, and improvements
-2. **Explain Code** - For getting clear explanations of code functionality
-3. **Debug Help** - For troubleshooting and identifying issues
-4. **Optimize Performance** - For improving code efficiency and performance
-5. **Write Tests** - For creating comprehensive test suites
-6. **Documentation** - For generating code documentation
-7. **Refactor Code** - For improving code structure and maintainability
-8. **Convert to Different Language** - For translating code between programming languages
+1. **Summarize Text** - Provide concise summaries of any text
+2. **Translate Text** - Translate text into a specified language
+3. **Explain Concept** - Clarify concepts with definitions and examples
+4. **Brainstorm Ideas** - Generate creative ideas with pros and cons
+5. **Improve Writing** - Enhance clarity, style, and tone of text
+6. **Plan Project** - Outline project plans with goals and milestones
+7. **Study Guide** - Create structured study notes and practice questions
+8. **Q&A Session** - Provide detailed answers with explanations
+9. **Reality Filter** - Ensure factual accuracy and label unverified content
+10. **Write Email** - Generate professional emails using placeholders
 
 #### Reset to Defaults
 - Click the "Reset to Defaults" button in the Prompt Manager
@@ -116,11 +117,11 @@ promt-extension/
 
 ### Adding Your Own Prompts
 The extension is designed to be flexible. You can create prompts for:
-- AI assistant interactions (ChatGPT, Claude, etc.)
-- Code review templates
-- Email templates
-- Social media posts
-- Writing prompts
+- Text summarization and translation
+- Concept explanations and brainstorming
+- Writing improvement and documentation
+- Project planning and study guides
+- Email and communication templates
 - Any repetitive text you use frequently
 
 ### Modifying Default Prompts
