@@ -634,9 +634,28 @@
             bottom: 0;
             background: white;
             padding: 20px 30px;
-            margin: 0 -30px;
+            margin: 0 ;
             border-top: 1px solid #e5e7eb;
             border-radius: 0 0 12px 12px;
+        }
+
+        .modal .button-group button {
+            min-width: 120px;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        /* Ensure modal buttons don't stretch full width on mobile */
+        @media (max-width: 600px) {
+            .modal .button-group {
+                flex-direction: row;
+                justify-content: flex-end;
+            }
+            
+            .modal .button-group button {
+                width: auto;
+                flex: 0 0 auto;
+            }
         }
 
         /* Custom scrollbar for modal */

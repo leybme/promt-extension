@@ -103,10 +103,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         const foundPlaceholders = [...promptText.matchAll(placeholderPattern)];
         
         if (foundPlaceholders.length > 0) {
-          // Replace placeholders that have default values, leave others as-is
+          // Replace placeholders that have default values, collect ones that need input
           const uniquePlaceholders = [...new Set(foundPlaceholders.map(match => match[1]))];
           
           let finalText = promptText;
+          const placeholdersNeedingInput = [];
           
           uniquePlaceholders.forEach(placeholderName => {
             const placeholderInfo = placeholders.find(p => p.name === placeholderName);
@@ -114,16 +115,27 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
               // Replace with default value using simple string replacement
               const placeholder = `[${placeholderName}]`;
               finalText = finalText.split(placeholder).join(placeholderInfo.defaultValue);
+            } else {
+              // Needs user input
+              placeholdersNeedingInput.push(placeholderName);
             }
-            // If no default value, leave the placeholder as-is in the text
           });
           
-          // Insert the text with replaced placeholders (or original placeholders if no defaults)
-          chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: insertPromptSimple,
-            args: [finalText]
-          });
+          if (placeholdersNeedingInput.length > 0) {
+            // Show dialog for placeholders without default values
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              function: showPlaceholderDialog,
+              args: [finalText, placeholdersNeedingInput, placeholders]
+            });
+          } else {
+            // All placeholders have default values, insert directly
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              function: insertPromptSimple,
+              args: [finalText]
+            });
+          }
         } else {
           // No placeholders, proceed with original insertion logic
           // First try a simple test injection
@@ -167,6 +179,24 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 function showPlaceholderDialog(promptText, foundPlaceholders, availablePlaceholders) {
   console.log('Showing placeholder dialog for:', foundPlaceholders);
+  
+  // Helper function to safely remove modal
+  function removeModal() {
+    console.log('Attempting to remove modal');
+    try {
+      if (modal && modal.parentNode) {
+        modal.parentNode.removeChild(modal);
+        console.log('Modal removed successfully');
+        return true;
+      } else {
+        console.log('Modal not found or not attached to DOM');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error removing modal:', error);
+      return false;
+    }
+  }
   
   // Create modal dialog
   const modal = document.createElement('div');
@@ -308,8 +338,32 @@ function showPlaceholderDialog(promptText, foundPlaceholders, availablePlacehold
     transition: all 0.2s;
   `;
   
+  buttonGroup.appendChild(cancelButton);
+  buttonGroup.appendChild(insertButton);
+  
+  modalContent.appendChild(title);
+  modalContent.appendChild(description);
+  modalContent.appendChild(form);
+  modalContent.appendChild(buttonGroup);
+  modal.appendChild(modalContent);
+  
+  document.body.appendChild(modal);
+  
+  // Add keyboard event listener for escape key
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      console.log('Escape key pressed');
+      removeModal();
+      document.removeEventListener('keydown', handleKeyDown);
+    }
+  };
+  document.addEventListener('keydown', handleKeyDown);
+  
+  // Update event listeners to reference the handleKeyDown function
   cancelButton.addEventListener('click', () => {
-    document.body.removeChild(modal);
+    console.log('Cancel button clicked');
+    removeModal();
+    document.removeEventListener('keydown', handleKeyDown);
   });
   
   form.addEventListener('submit', (e) => {
@@ -325,22 +379,12 @@ function showPlaceholderDialog(promptText, foundPlaceholders, availablePlacehold
     });
     
     // Remove the modal
-    document.body.removeChild(modal);
+    removeModal();
+    document.removeEventListener('keydown', handleKeyDown);
     
     // Insert the final text
     insertPromptSimple(finalText);
   });
-  
-  buttonGroup.appendChild(cancelButton);
-  buttonGroup.appendChild(insertButton);
-  
-  modalContent.appendChild(title);
-  modalContent.appendChild(description);
-  modalContent.appendChild(form);
-  modalContent.appendChild(buttonGroup);
-  modal.appendChild(modalContent);
-  
-  document.body.appendChild(modal);
   
   // Focus on first input
   if (foundPlaceholders.length > 0) {
@@ -350,7 +394,9 @@ function showPlaceholderDialog(promptText, foundPlaceholders, availablePlacehold
   // Close on outside click
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
-      document.body.removeChild(modal);
+      console.log('Outside click detected');
+      removeModal();
+      document.removeEventListener('keydown', handleKeyDown);
     }
   });
 }

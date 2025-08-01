@@ -445,6 +445,7 @@ document.getElementById('addPlaceholder').addEventListener('click', () => {
 });
 
 document.getElementById('cancelPlaceholder').addEventListener('click', () => {
+  document.getElementById('placeholderModal').style.display = 'none';
   document.getElementById('placeholderName').value = '';
   document.getElementById('placeholderDescription').value = '';
   document.getElementById('placeholderDefaultValue').value = '';
