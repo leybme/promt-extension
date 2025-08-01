@@ -121,21 +121,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             }
           });
           
-          if (placeholdersNeedingInput.length > 0) {
-            // Show dialog for placeholders without default values
-            chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              function: showPlaceholderDialog,
-              args: [finalText, placeholdersNeedingInput, placeholders]
-            });
-          } else {
-            // All placeholders have default values, insert directly
-            chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              function: insertPromptSimple,
-              args: [finalText]
-            });
-          }
+          // Insert prompt directly without placeholder replacement modal
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: insertPromptSimple,
+            args: [finalText]
+          });
         } else {
           // No placeholders, proceed with original insertion logic
           // First try a simple test injection

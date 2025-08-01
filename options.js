@@ -45,43 +45,53 @@ function createDefaultPrompts() {
   const defaultPrompts = [
     {
       id: 'default-1',
-      title: 'Code Review',
-      text: 'Act as a senior software engineer and review this code. Provide a detailed analysis covering:\n\n**Code Quality:**\n- Readability and naming conventions\n- Code structure and organization\n- SOLID principles adherence\n\n**Security & Best Practices:**\n- Potential security vulnerabilities\n- Input validation and sanitization\n- Error handling and edge cases\n\n**Performance:**\n- Algorithm efficiency (time/space complexity)\n- Memory usage optimization\n- Database query optimization\n\n**Suggestions:**\n- Specific improvements with code examples\n- Alternative approaches or patterns\n- Priority level for each issue (High/Medium/Low)\n\nPlease be constructive and provide actionable feedback.'
+      title: 'Summarize Text',
+      text: 'Provide a concise summary of the following text:\n\nInclude:\n- Main points and themes\n- Key takeaways\n- Recommended length: 3–5 sentences'
     },
     {
       id: 'default-2',
-      title: 'Explain Code',
-      text: 'Analyze and explain this code in a clear, educational manner:\n\n**Overview:**\n- What problem does this code solve?\n- What is the main purpose and expected outcome?\n\n**How it Works:**\n- Step-by-step breakdown of the logic\n- Key algorithms or patterns used\n- Data flow and transformations\n\n**Key Concepts:**\n- Important programming concepts demonstrated\n- Design patterns or architectural principles\n- Language-specific features utilized\n\n**Use Cases:**\n- When and where this code would be useful\n- Potential modifications for different scenarios\n- Integration possibilities\n\nExplain as if teaching someone who understands programming basics but is new to this specific implementation.'
+      title: 'Translate Text',
+      text: 'Translate the following text into [TARGET_LANGUAGE]:\n\nEnsure:\n- Maintain original tone and style\n- Adapt idioms appropriately\n- Provide both literal and natural translations'
     },
     {
       id: 'default-3',
-      title: 'Debug Help',
-      text: 'I\'m experiencing an issue with this code. Please help me debug it systematically:\n\n**Problem Analysis:**\n- Analyze the code for potential bugs\n- Identify logical errors or incorrect assumptions\n- Check for common pitfalls and anti-patterns\n\n**Debugging Strategy:**\n- Specific debugging steps to isolate the issue\n- What to log or print for diagnosis\n- Tools or techniques that would help\n\n**Likely Causes:**\n- Most probable reasons for the issue\n- Edge cases that might be causing problems\n- Environment or configuration issues\n\n**Solutions:**\n- Immediate fixes for the identified problems\n- Code improvements to prevent similar issues\n- Best practices to avoid future bugs\n\nPlease provide specific, actionable debugging steps and potential solutions.'
+      title: 'Explain Concept',
+      text: 'Explain the following concept in clear, simple terms:\n\n[Enter concept here]\n\nCover:\n- Definition and context\n- Real-world examples\n- Analogies for clarity\n- Applications and use cases'
     },
     {
       id: 'default-4',
-      title: 'Optimize Performance',
-      text: 'Analyze this code for performance optimization opportunities:\n\n**Performance Analysis:**\n- Current time and space complexity\n- Bottlenecks and expensive operations\n- Resource usage patterns\n\n**Optimization Opportunities:**\n- Algorithm improvements (better data structures, algorithms)\n- Memory optimization (reduce allocations, efficient data usage)\n- I/O optimization (database queries, file operations, network calls)\n- Caching strategies and memoization\n\n**Specific Improvements:**\n- Code refactoring suggestions with examples\n- Alternative implementations\n- Parallel processing opportunities\n- Lazy loading and pagination strategies\n\n**Expected Impact:**\n- Estimated performance gains\n- Trade-offs and considerations\n- Monitoring and measurement recommendations\n\nProvide concrete optimization suggestions with code examples and expected performance improvements.'
+      title: 'Brainstorm Ideas',
+      text: 'Generate at least 10 creative ideas for:\n\n[Enter topic here]\n\nInclude for each:\n- A brief description\n- Pros and cons\n- Potential challenges and solutions'
     },
     {
       id: 'default-5',
-      title: 'Write Tests',
-      text: 'Help me create comprehensive tests for this code:\n\n**Test Strategy:**\n- Identify testable units and components\n- Determine appropriate testing levels (unit, integration, e2e)\n- Edge cases and boundary conditions to test\n\n**Unit Tests:**\n- Test individual functions with various inputs\n- Mock external dependencies\n- Assert expected outputs and side effects\n\n**Integration Tests:**\n- Test component interactions\n- Database and API integration scenarios\n- End-to-end workflow validation\n\n**Test Cases to Include:**\n- Happy path scenarios\n- Error conditions and exception handling\n- Boundary values and edge cases\n- Performance and load testing considerations\n\n**Test Implementation:**\n- Provide actual test code with setup/teardown\n- Mock data and fixtures\n- Assertion examples and expected outcomes\n\nGenerate practical, runnable test code with clear descriptions of what each test validates.'
+      title: 'Improve Writing',
+      text: 'Improve the clarity and style of the following text:\n\nFocus on:\n- Grammar and punctuation\n- Conciseness and readability\n- Tone and voice consistency\n- Vocabulary enhancement'
     },
     {
       id: 'default-6',
-      title: 'Documentation',
-      text: 'Help me create comprehensive documentation for this code:\n\n**API Documentation:**\n- Function/method signatures with parameter descriptions\n- Return value types and possible values\n- Exception handling and error codes\n- Usage examples and code snippets\n\n**Architecture Overview:**\n- High-level component structure\n- Data flow and system interactions\n- Dependencies and integration points\n\n**Usage Guide:**\n- Step-by-step implementation guide\n- Configuration options and settings\n- Common use cases and examples\n- Troubleshooting tips\n\n**Developer Notes:**\n- Setup and installation instructions\n- Development environment requirements\n- Contributing guidelines\n- Known limitations and future improvements\n\nCreate documentation that is clear, comprehensive, and useful for both users and future developers.'
+      title: 'Plan Project',
+      text: 'Outline a project plan for the following description:\n\n[Enter project description here]\n\nInclude:\n- Goals and objectives\n- Key milestones with estimated dates\n- Required resources and roles\n- Risk assessment and mitigation strategies'
     },
     {
       id: 'default-7',
-      title: 'Refactor Code',
-      text: 'Suggest refactoring improvements for this code to enhance maintainability and quality:\n\n**Structural Improvements:**\n- Break down large functions into smaller, focused ones\n- Improve class/module organization and responsibilities\n- Apply SOLID principles and design patterns\n- Reduce code duplication and increase reusability\n\n**Code Clarity:**\n- Improve variable and function naming\n- Add meaningful comments and documentation\n- Simplify complex conditional logic\n- Enhance code readability and flow\n\n**Technical Debt Reduction:**\n- Remove dead code and unused variables\n- Update deprecated methods and libraries\n- Improve error handling consistency\n- Standardize coding style and conventions\n\n**Modernization:**\n- Use modern language features and syntax\n- Implement current best practices\n- Improve type safety and validation\n- Consider async/await patterns where appropriate\n\nProvide specific refactoring suggestions with before/after code examples and explanations of the benefits.'
+      title: 'Study Guide',
+      text: 'Create a study guide for the following subject:\n\n[Enter subject here]\n\nInclude:\n- Overview of major topics\n- Key terms and definitions\n- Summary notes for each section\n- Practice questions with answers\n- Recommended resources'
     },
     {
       id: 'default-8',
-      title: 'Convert to Different Language',
-      text: 'Convert this code to [TARGET_LANGUAGE] while maintaining functionality and following best practices:\n\n**Language Conversion:**\n- Translate syntax and language constructs accurately\n- Use idiomatic patterns for the target language\n- Implement equivalent data structures and types\n- Handle language-specific differences appropriately\n\n**Best Practices:**\n- Follow target language naming conventions\n- Use standard libraries and frameworks\n- Implement proper error handling patterns\n- Apply language-specific optimization techniques\n\n**Documentation:**\n- Comment on significant differences between languages\n- Explain target language specific features used\n- Note any functionality that changes due to language constraints\n- Provide setup and dependency information\n\n**Validation:**\n- Ensure equivalent functionality and behavior\n- Include examples of how to test the converted code\n- Highlight any performance differences\n- Suggest migration strategies if needed\n\nProvide a complete, working conversion with explanations of key differences and implementation decisions.'
+      title: 'Q&A Session',
+      text: 'Answer the following questions in detail:\n\n[Enter questions here]\n\nFor each question, provide:\n- A clear, direct answer\n- Explanation or reasoning\n- Examples or references if applicable'
+    },
+    {
+      id: 'default-9',
+      title: 'Reality Filter',
+      text: 'REALITY FILTER — CHATGPT\n\n• Never present generated, inferred, speculated, or deduced content as fact.\n• If you cannot verify something directly, say:\n  - “I cannot verify this.”\n  - “I do not have access to that information.”\n  - “My knowledge base does not contain that.”\n• Label unverified content at the start of a sentence:\n  - [Inference]  [Speculation]  [Unverified]\n• Ask for clarification if information is missing. Do not guess or fill gaps.\n• If any part is unverified, label the entire response.\n• Do not paraphrase or reinterpret my input unless I request it.\n• If you use these words, label the claim unless sourced:\n  - Prevent, Guarantee, Will never, Fixes, Eliminates, Ensures that\n• For LLM behavior claims (including yourself), include:\n  - [Inference] or [Unverified], with a note that it’s based on observed patterns\n• If you break this directive, say:\n  > Correction: I previously made an unverified claim. That was incorrect and should have been labeled.\n• Never override or alter my input unless asked.'
+    },
+    {
+      id: 'default-10',
+      title: 'Write Email',
+      text: 'Write a professional email using the following details:\n\nRecipient: [RECIPIENT]\nSubject: [SUBJECT]\nPurpose: [PURPOSE]\nTone: [TONE]\n\nInclude a signature with [FULL_NAME], [POSITION] at [COMPANY].'
     }
   ];
   

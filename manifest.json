@@ -2,6 +2,12 @@
   "manifest_version": 3,
   "name": "Prompt Saver",
   "version": "1.0",
+  "icons": {
+    "16": "favicon-16x16.png",
+    "32": "favicon-32x32.png",
+    "48": "favicon.png",
+    "128": "favicon.ico"
+  },
   "permissions": ["storage", "contextMenus", "scripting", "clipboardWrite"],
   "host_permissions": ["<all_urls>"],
   "background": {
