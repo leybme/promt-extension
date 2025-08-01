@@ -1,3 +1,46 @@
+// Function to truncate text to first 5 sentences
+function truncateToSentences(text, sentenceCount = 5) {
+  // Remove markdown formatting and clean up text
+  const cleanText = text.replace(/\*\*/g, '').replace(/\n\n/g, ' ').replace(/\n/g, ' ');
+  
+  // Split by sentence endings and structured text patterns
+  // Look for periods, exclamation marks, question marks, and colons followed by spaces
+  const sentences = cleanText.match(/[^\.!?:]+[\.!?:]+(?=\s|$)/g) || [];
+  
+  // If no proper sentences found, try splitting by double spaces or use word-based truncation
+  if (sentences.length === 0) {
+    // Try splitting by patterns that indicate new sections
+    const sections = cleanText.split(/(?:\s{2,}|\s*-\s)/).filter(s => s.trim().length > 0);
+    
+    if (sections.length > 1) {
+      // Use first few sections as "sentences"
+      if (sections.length <= sentenceCount) {
+        return { truncated: cleanText, isTruncated: false };
+      }
+      const truncated = sections.slice(0, sentenceCount).join(' ').trim();
+      return { truncated: truncated + '...', isTruncated: true };
+    }
+    
+    // Fall back to word-based truncation for very short or unstructured text
+    const words = cleanText.split(' ');
+    const wordLimit = sentenceCount * 15; // Approximately 15 words per "sentence"
+    
+    if (words.length <= wordLimit) {
+      return { truncated: cleanText, isTruncated: false };
+    }
+    const truncated = words.slice(0, wordLimit).join(' ');
+    return { truncated: truncated + '...', isTruncated: true };
+  }
+  
+  if (sentences.length <= sentenceCount) {
+    return { truncated: cleanText, isTruncated: false };
+  }
+  
+  // Take first few sentences and clean them up
+  const truncated = sentences.slice(0, sentenceCount).join(' ').trim();
+  return { truncated: truncated + '...', isTruncated: true };
+}
+
 function createDefaultPrompts() {
   const defaultPrompts = [
     {
@@ -74,12 +117,15 @@ function loadPrompts() {
     }
     
     prompts.forEach(p => {
+      const { truncated, isTruncated } = truncateToSentences(p.text);
+      
       const div = document.createElement('div');
       div.className = 'prompt-item';
       div.innerHTML = `
-        <div class="prompt-content" data-title="${p.title}" data-text="${p.text}">
+        <div class="prompt-content" data-title="${p.title}" data-text="${p.text}" data-expanded="false">
           <strong>${p.title}</strong>
-          <p>${p.text}</p>
+          <p class="prompt-text">${truncated}</p>
+          ${isTruncated ? '<span class="expand-indicator">Click to expand...</span>' : ''}
         </div>
         <div class="prompt-actions">
           <button data-id="${p.id}" data-title="${p.title}" data-text="${p.text}" class="edit">Edit</button>
@@ -182,13 +228,46 @@ document.getElementById('promptList').addEventListener('click', (e) => {
     document.getElementById('title').focus();
     
   } else if (e.target.closest('.prompt-content')) {
-    // Load prompt into input fields when clicked (existing functionality)
+    // Handle expand/collapse functionality
     const promptContent = e.target.closest('.prompt-content');
     const title = promptContent.dataset.title;
     const text = promptContent.dataset.text;
+    const isExpanded = promptContent.dataset.expanded === 'true';
+    const promptTextElement = promptContent.querySelector('.prompt-text');
+    const expandIndicator = promptContent.querySelector('.expand-indicator');
     
-    document.getElementById('title').value = title;
-    document.getElementById('prompt').value = text;
+    const { truncated, isTruncated } = truncateToSentences(text);
+    
+    // Always handle expand/collapse if the text can be truncated
+    if (isTruncated || isExpanded) {
+      if (isExpanded) {
+        // Collapse: show truncated version
+        promptTextElement.textContent = truncated;
+        promptContent.dataset.expanded = 'false';
+        
+        // Remove collapse indicator and add expand indicator
+        if (expandIndicator) {
+          expandIndicator.remove();
+        }
+        const newExpandIndicator = document.createElement('span');
+        newExpandIndicator.className = 'expand-indicator';
+        newExpandIndicator.textContent = 'Click to expand...';
+        promptContent.appendChild(newExpandIndicator);
+      } else {
+        // Expand: show full text
+        promptTextElement.textContent = text;
+        promptContent.dataset.expanded = 'true';
+        
+        // Remove expand indicator and add collapse indicator
+        if (expandIndicator) {
+          expandIndicator.remove();
+        }
+        const collapseIndicator = document.createElement('span');
+        collapseIndicator.className = 'expand-indicator';
+        collapseIndicator.textContent = 'Click to collapse...';
+        promptContent.appendChild(collapseIndicator);
+      }
+    }
   }
 });
 
