@@ -102,11 +102,17 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-family: inherit;
+            box-shadow: none;
         }
 
         button:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
         #add {
@@ -221,12 +227,12 @@
 
         .edit,
         .delete {
-            padding: 8px 16px !important;
-            font-size: 12px !important;
-            border-radius: 6px !important;
-            font-weight: 600 !important;
-            transition: all 0.2s ease !important;
-            margin: 0 !important;
+            padding: 8px 16px;
+            font-size: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin: 0;
         }
 
         .edit {
@@ -247,6 +253,16 @@
         .delete:hover {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             transform: translateY(-1px);
+        }
+
+        .edit:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .delete:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
         }
 
         .empty-state {
@@ -319,8 +335,8 @@
         }
 
         .manage-placeholders-btn {
-            padding: 6px 12px !important;
-            font-size: 12px !important;
+            padding: 6px 12px;
+            font-size: 12px;
             background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
             color: white;
             border: none;
@@ -332,6 +348,11 @@
         .manage-placeholders-btn:hover {
             background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
             transform: translateY(-1px);
+        }
+
+        .manage-placeholders-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
 
         .placeholder-tags {
@@ -392,6 +413,9 @@
             border-radius: 12px;
             width: 90%;
             max-width: 500px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             animation: modalSlideIn 0.3s ease;
         }
@@ -438,14 +462,25 @@
             justify-content: center;
             border-radius: 6px;
             transition: background-color 0.2s;
+            box-shadow: none;
         }
 
         .close-modal:hover {
             background-color: rgba(255, 255, 255, 0.1);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .close-modal:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: none;
         }
 
         .modal-body {
             padding: 30px;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .placeholder-list {
@@ -495,11 +530,19 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: none;
         }
 
         .delete-placeholder:hover {
             background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .delete-placeholder:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
         }
 
         /* Default Values Styles */
@@ -584,6 +627,50 @@
             font-size: 11px;
             font-weight: 500;
         }
+
+        /* Modal Button Groups */
+        .modal .button-group {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 20px 30px;
+            margin: 0 -30px;
+            border-top: 1px solid #e5e7eb;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Custom scrollbar for modal */
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* Helper text styles */
+        .help-text {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .modal-description {
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 
@@ -657,18 +744,18 @@
                 <div class="form-group">
                     <label for="placeholderDefaultValue">Default Value (Optional)</label>
                     <input type="text" id="placeholderDefaultValue" placeholder="e.g., JavaScript, John Smith">
-                    <small style="color: #6b7280; font-size: 12px; margin-top: 4px; display: block;">
+                    <small class="help-text">
                         If set, this value will be used automatically when inserting prompts
                     </small>
-                </div>
-                <div class="button-group">
-                    <button id="addPlaceholder">Add Placeholder</button>
-                    <button id="cancelPlaceholder">Cancel</button>
                 </div>
                 <div class="placeholder-list">
                     <h3>Existing Placeholders</h3>
                     <div id="existingPlaceholders"></div>
                 </div>
+            </div>
+            <div class="button-group">
+                <button id="addPlaceholder">Add Placeholder</button>
+                <button id="cancelPlaceholder">Cancel</button>
             </div>
         </div>
     </div>
@@ -681,14 +768,14 @@
                 <button class="close-modal" id="closeDefaultValuesModal">&times;</button>
             </div>
             <div class="modal-body">
-                <p style="color: #6b7280; margin-bottom: 20px; line-height: 1.5;">
+                <p class="modal-description">
                     Set default values for your placeholders. When a prompt contains these placeholders, the default values will be used automatically without asking.
                 </p>
                 <div id="defaultValuesForm"></div>
-                <div class="button-group" style="margin-top: 24px;">
-                    <button id="saveDefaultValues">Save Default Values</button>
-                    <button id="cancelDefaultValues">Cancel</button>
-                </div>
+            </div>
+            <div class="button-group">
+                <button id="saveDefaultValues">Save Default Values</button>
+                <button id="cancelDefaultValues">Cancel</button>
             </div>
         </div>
     </div>

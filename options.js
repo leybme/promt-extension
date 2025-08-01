@@ -93,14 +93,10 @@ function createDefaultPrompts() {
 
 function createDefaultPlaceholders() {
   const defaultPlaceholders = [
-    { name: 'TARGET_LANGUAGE', description: 'Programming language to convert to', defaultValue: '' },
+    { name: 'TARGET_LANGUAGE', description: 'Target language', defaultValue: '' },
     { name: 'FULL_NAME', description: 'Your full name', defaultValue: '' },
     { name: 'POSITION', description: 'Your job title or position', defaultValue: '' },
     { name: 'COMPANY', description: 'Your company name', defaultValue: '' },
-    { name: 'PROJECT_NAME', description: 'Name of the current project', defaultValue: '' },
-    { name: 'FRAMEWORK', description: 'Framework or library being used', defaultValue: '' },
-    { name: 'DATABASE', description: 'Database system being used', defaultValue: '' },
-    { name: 'API_NAME', description: 'Name of the API or service', defaultValue: '' }
   ];
   
   chrome.storage.local.set({ placeholders: defaultPlaceholders }, () => {

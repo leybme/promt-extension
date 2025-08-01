@@ -67,14 +67,10 @@ chrome.runtime.onInstalled.addListener(() => {
     if (placeholders.length === 0) {
       console.log('Creating default placeholders...');
       const defaultPlaceholders = [
-        { name: 'TARGET_LANGUAGE', description: 'Programming language to convert to', defaultValue: '' },
+        { name: 'TARGET_LANGUAGE', description: 'Language to convert to', defaultValue: '' },
         { name: 'FULL_NAME', description: 'Your full name', defaultValue: '' },
         { name: 'POSITION', description: 'Your job title or position', defaultValue: '' },
         { name: 'COMPANY', description: 'Your company name', defaultValue: '' },
-        { name: 'PROJECT_NAME', description: 'Name of the current project', defaultValue: '' },
-        { name: 'FRAMEWORK', description: 'Framework or library being used', defaultValue: '' },
-        { name: 'DATABASE', description: 'Database system being used', defaultValue: '' },
-        { name: 'API_NAME', description: 'Name of the API or service', defaultValue: '' }
       ];
       
       chrome.storage.local.set({ placeholders: defaultPlaceholders });
@@ -107,12 +103,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         const foundPlaceholders = [...promptText.matchAll(placeholderPattern)];
         
         if (foundPlaceholders.length > 0) {
-          // Show placeholder replacement dialog
+          // Replace placeholders that have default values, leave others as-is
           const uniquePlaceholders = [...new Set(foundPlaceholders.map(match => match[1]))];
           
-          // Check which placeholders have default values
           let finalText = promptText;
-          const placeholdersNeedingInput = [];
           
           uniquePlaceholders.forEach(placeholderName => {
             const placeholderInfo = placeholders.find(p => p.name === placeholderName);
@@ -120,27 +114,16 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
               // Replace with default value using simple string replacement
               const placeholder = `[${placeholderName}]`;
               finalText = finalText.split(placeholder).join(placeholderInfo.defaultValue);
-            } else {
-              // Needs user input
-              placeholdersNeedingInput.push(placeholderName);
             }
+            // If no default value, leave the placeholder as-is in the text
           });
           
-          if (placeholdersNeedingInput.length > 0) {
-            // Show dialog only for placeholders without default values
-            chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              function: showPlaceholderDialog,
-              args: [finalText, placeholdersNeedingInput, placeholders]
-            });
-          } else {
-            // All placeholders have default values, insert directly
-            chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              function: insertPromptSimple,
-              args: [finalText]
-            });
-          }
+          // Insert the text with replaced placeholders (or original placeholders if no defaults)
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: insertPromptSimple,
+            args: [finalText]
+          });
         } else {
           // No placeholders, proceed with original insertion logic
           // First try a simple test injection
